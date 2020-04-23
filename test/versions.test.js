@@ -55,6 +55,8 @@ describe('versions', () => {
     expect(versionInfo.$NEXT_MINOR_VERSION.version).toEqual('10.1.0-alpha.0')
     expect(versionInfo.$NEXT_PATCH_VERSION.version).toEqual('10.0.2-alpha.0')
     expect(versionInfo.$NEXT_BUILD_VERSION.version).toEqual('10.0.1-alpha.4')
+
+    expect(versionInfo.$NEXT_BUILD_VERSION.$BUILD).toEqual(4)
   })
 
   it('returns undefined if no version was found in tag or name', () => {
