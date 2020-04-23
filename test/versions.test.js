@@ -45,18 +45,16 @@ describe('versions', () => {
     expect(versionInfo.$NEXT_PATCH_VERSION.version).toEqual('10.0.4')
   })
 
-  it('handles weird formatting', () => {
-    const versionInfo = getVersionInfo(
-      {
-        tag_name: 'Orion_v10.0.1.3',
-        name: 'Orion_v10.0.1.3'
-      },
-      'v$MAJOR.0.$MINOR.$PATCH'
-    )
+  it('handles TBCT formatting', () => {
+    const versionInfo = getVersionInfo({
+      tag_name: 'orion_v10.0.1-alpha.3',
+      name: 'orion_v10.0.1-alpha.3'
+    })
 
-    expect(versionInfo.$NEXT_MAJOR_VERSION.version).toEqual('1.0.0')
-    expect(versionInfo.$NEXT_MINOR_VERSION.version).toEqual('0.2.0')
-    expect(versionInfo.$NEXT_PATCH_VERSION.version).toEqual('0.1.4')
+    expect(versionInfo.$NEXT_MAJOR_VERSION.version).toEqual('11.0.0-alpha.0')
+    expect(versionInfo.$NEXT_MINOR_VERSION.version).toEqual('10.1.0-alpha.0')
+    expect(versionInfo.$NEXT_PATCH_VERSION.version).toEqual('10.0.2-alpha.0')
+    expect(versionInfo.$NEXT_BUILD_VERSION.version).toEqual('10.0.1-alpha.4')
   })
 
   it('returns undefined if no version was found in tag or name', () => {
