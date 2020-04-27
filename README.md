@@ -26,8 +26,9 @@ jobs:
       # Drafts your next Release notes as Pull Requests are merged into "master"
       - uses: release-drafter/release-drafter@v5
         with:
-          # (Optional) specify config name to use, relative to .github/. Default: release-drafter.yml
-          # config-name: my-config.yml
+          # config-name: (Optional) specify config name to use, relative to .github/. Default: release-drafter.yml
+          # publish: (Optional) - Publish the release immediately. Default: false
+          # allow-release-update: (Optional) - If publishing allow updating of existing release. Default: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 ```

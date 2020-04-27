@@ -59,6 +59,8 @@ module.exports = app => {
     })
 
     const shouldDraft = core.getInput('publish').toLowerCase() !== 'true'
+    const allowReleaseUpdate =
+      core.getInput('allow-release-update').toLowerCase() == 'true'
 
     let createOrUpdateReleaseResponse
     if (!draftRelease) {
@@ -72,18 +74,23 @@ module.exports = app => {
           config
         })
       } catch (err) {
-        log({
-          app,
-          context,
-          message: 'Release already exists! Trying to update existing release'
-        })
-        createOrUpdateReleaseResponse = await updateRelease({
-          context,
-          draftRelease,
-          releaseInfo,
-          shouldDraft,
-          config
-        })
+        if (allowReleaseUpdate) {
+          log({
+            app,
+            context,
+            message: 'Release already exists! Trying to update existing release'
+          })
+
+          createOrUpdateReleaseResponse = await context.github.repos.updateRelease(
+            context.repo({
+              release_id: lastRelease.id,
+              body: releaseInfo.body,
+              draft: shouldDraft,
+              name: releaseInfo.name,
+              tag_name: releaseInfo.tag
+            })
+          )
+        }
       }
     } else {
       log({ app, context, message: 'Updating existing release' })
