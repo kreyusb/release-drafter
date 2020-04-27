@@ -63,12 +63,28 @@ module.exports = app => {
     let createOrUpdateReleaseResponse
     if (!draftRelease) {
       log({ app, context, message: 'Creating new release' })
-      createOrUpdateReleaseResponse = await createRelease({
-        context,
-        releaseInfo,
-        shouldDraft,
-        config
-      })
+
+      try {
+        createOrUpdateReleaseResponse = await createRelease({
+          context,
+          releaseInfo,
+          shouldDraft,
+          config
+        })
+      } catch (err) {
+        log({
+          app,
+          context,
+          message: 'Release already exists! Trying to update existing release'
+        })
+        createOrUpdateReleaseResponse = await updateRelease({
+          context,
+          draftRelease,
+          releaseInfo,
+          shouldDraft,
+          config
+        })
+      }
     } else {
       log({ app, context, message: 'Updating existing release' })
       createOrUpdateReleaseResponse = await updateRelease({
