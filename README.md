@@ -28,7 +28,6 @@ jobs:
         with:
           # config-name: (Optional) specify config name to use, relative to .github/. Default: release-drafter.yml
           # publish: (Optional) - Publish the release immediately. Default: false
-          # allow-release-update: (Optional) - If publishing allow updating of existing release. Default: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 ```
