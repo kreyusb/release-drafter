@@ -1,6 +1,7 @@
 const { getConfig } = require('./lib/config')
 const { isTriggerableBranch } = require('./lib/triggerable-branch')
 const {
+  findRelease,
   findReleases,
   generateReleaseInfo,
   createRelease,
@@ -64,12 +65,29 @@ module.exports = app => {
     if (!draftRelease) {
       log({ app, context, message: 'Creating new release' })
 
-      createOrUpdateReleaseResponse = await createRelease({
-        context,
-        releaseInfo,
-        shouldDraft,
-        config
-      })
+      try {
+        createOrUpdateReleaseResponse = await createRelease({
+          context,
+          releaseInfo,
+          shouldDraft,
+          config
+        })
+      } catch (err) {
+        const lastReleaseMatch = await findRelease({
+          app,
+          context,
+          releaseInfo
+        })
+        createOrUpdateReleaseResponse = await context.github.repos.updateRelease(
+          context.repo({
+            release_id: lastReleaseMatch.id,
+            body: releaseInfo.body,
+            draft: shouldDraft,
+            name: releaseInfo.name,
+            tag_name: releaseInfo.tag
+          })
+        )
+      }
     } else {
       log({ app, context, message: 'Updating existing release' })
       createOrUpdateReleaseResponse = await updateRelease({
