@@ -81,14 +81,24 @@ module.exports = app => {
       })
     }
 
-    setActionOutput(createOrUpdateReleaseResponse)
+    var outputTag = ''
+    if (releaseInfo && releaseInfo.tag) {
+      outputTag = releaseInfo.tag
+    } else if (draftRelease && draftRelease.tag_name) {
+      outputTag = draftRelease.tag_name
+    } else {
+      outputTag = undefined
+    }
+
+    setActionOutput(createOrUpdateReleaseResponse, outputTag)
   })
 }
 
-function setActionOutput(releaseResponse) {
+function setActionOutput(releaseResponse, releaseTag) {
   const {
     data: { id: releaseId, html_url: htmlUrl, upload_url: uploadUrl }
   } = releaseResponse
+  if (releaseTag) core.setOutput('release_tag', releaseTag)
   if (releaseId && Number.isInteger(releaseId))
     core.setOutput('id', releaseId.toString())
   if (htmlUrl) core.setOutput('html_url', htmlUrl)
