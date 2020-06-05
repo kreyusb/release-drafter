@@ -1,6 +1,35 @@
 const { getVersionInfo } = require('../lib/versions')
+const { sortReleases } = require('../lib/releases')
 
 describe('versions', () => {
+  it('sort with a device name', () => {
+    const labels = Array(
+      {
+        tag_name: 'Orion_v1.1.1-Dev11',
+        published_at: new Date(98, 2).toString()
+      },
+      {
+        tag_name: 'Orion_v1.1.2-Dev0',
+        published_at: new Date(98, 4).toString()
+      },
+      {
+        tag_name: 'Orion_v1.1.1-Rel12',
+        published_at: new Date(98, 3).toString()
+      },
+      {
+        tag_name: 'Orion_v1.1.1-Rel10',
+        published_at: new Date(98, 1).toString()
+      }
+    )
+
+    const sorted = sortReleases(labels)
+
+    expect(sorted[0].tag_name).toEqual('Orion_v1.1.1-Rel10')
+    expect(sorted[1].tag_name).toEqual('Orion_v1.1.1-Dev11')
+    expect(sorted[2].tag_name).toEqual('Orion_v1.1.1-Rel12')
+    expect(sorted[3].tag_name).toEqual('Orion_v1.1.2-Dev0')
+  })
+
   it('extracts a version-like string from the last tag', () => {
     const versionInfo = getVersionInfo({
       tag_name: 'v10.0.3',

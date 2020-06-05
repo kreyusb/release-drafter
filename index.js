@@ -19,6 +19,8 @@ module.exports = app => {
       configName: core.getInput('config-name')
     })
 
+    const deviceName = core.getInput('device-name')
+
     if (config === null) return
 
     // GitHub Actions merge payloads slightly differ, in that their ref points
@@ -31,7 +33,11 @@ module.exports = app => {
       return
     }
 
-    const { draftRelease, lastRelease } = await findReleases({ app, context })
+    const { draftRelease, lastRelease } = await findReleases({
+      app,
+      context,
+      deviceName
+    })
     const {
       commits,
       pullRequests: mergedPullRequests
@@ -55,7 +61,8 @@ module.exports = app => {
       mergedPullRequests: sortedMergedPullRequests,
       version: core.getInput('version') || undefined,
       tag: core.getInput('tag') || undefined,
-      name: core.getInput('name') || undefined
+      name: core.getInput('name') || undefined,
+      deviceName: core.getInput('device-name') || undefined
     })
 
     const shouldDraft = core.getInput('publish').toLowerCase() !== 'true'
