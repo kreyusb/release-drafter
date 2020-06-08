@@ -13,14 +13,41 @@ const core = require('@actions/core')
 
 module.exports = app => {
   app.on('push', async context => {
-    const config = await getConfig({
+    let config = await getConfig({
       app,
       context,
       configName: core.getInput('config-name')
     })
 
     const deviceName = core.getInput('device-name')
+    const buildType = core.getInput('build-type')
+    const tagTemplate = core.getInput('version-bump')
 
+    // If we have a device name and build type use that for the template
+    if (deviceName && buildType) {
+      config['version-template'] =
+        deviceName + '_v$MAJOR.$MINOR.$PATCH-' + buildType + '.$BUILD'
+    }
+
+    if (tagTemplate) {
+      switch (tagTemplate.toLowerCase()) {
+        case 'build':
+          config['name-template'] = '$NEXT_BUILD_VERSION'
+          config['tag-template'] = '$NEXT_BUILD_VERSION'
+          break
+        case 'patch':
+          config['name-template'] = '$NEXT_PATCH_VERSION'
+          config['tag-template'] = '$NEXT_PATCH_VERSION'
+          break
+        case 'minor':
+          config['name-template'] = '$NEXT_MINOR_VERSION'
+          config['tag-template'] = '$NEXT_MINOR_VERSION'
+          break
+        case 'major':
+          config['name-template'] = '$NEXT_MAJOR_VERSION'
+          config['tag-template'] = '$NEXT_MAJOR_VERSION'
+      }
+    }
     if (config === null) return
 
     // GitHub Actions merge payloads slightly differ, in that their ref points
@@ -33,19 +60,23 @@ module.exports = app => {
       return
     }
 
-    const { draftRelease, lastRelease } = await findReleases({
-      app,
-      context,
-      deviceName
-    })
+    const { draftRelease, lastRelease, lastTaggedRelease } = await findReleases(
+      {
+        app,
+        context,
+        deviceName,
+        buildType
+      }
+    )
+
     const {
       commits,
       pullRequests: mergedPullRequests
     } = await findCommitsWithAssociatedPullRequests({
-      app,
-      context,
-      branch,
-      lastRelease
+      app: app,
+      context: context,
+      branch: branch,
+      lastRelease: lastRelease
     })
 
     const sortedMergedPullRequests = sortPullRequests(
@@ -55,9 +86,9 @@ module.exports = app => {
     )
 
     const releaseInfo = generateReleaseInfo({
-      commits,
-      config,
-      lastRelease,
+      commits: commits,
+      config: config,
+      lastRelease: lastTaggedRelease,
       mergedPullRequests: sortedMergedPullRequests,
       version: core.getInput('version') || undefined,
       tag: core.getInput('tag') || undefined,
